@@ -30,7 +30,9 @@ function CreateGame(props) {
     // Create/Set player and game objects
     const gameRef = Games.doc();
     const playerRef = Players.doc();
-    await gameRef.set(getGameObject(currentUser, state.cardsToWin, state.playerCount, playerRef.id));
+    await gameRef.set(
+      getGameObject(currentUser, state.cardsToWin, state.playerCount, playerRef.id)
+    );
     await playerRef.set(getPlayerObject(currentUser, gameRef.id, true));
     const gameData = { ...(await gameRef.get()).data(), _id: gameRef.id };
     const playerData = { ...(await playerRef.get()).data(), _id: playerRef.id };

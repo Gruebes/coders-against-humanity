@@ -77,3 +77,7 @@ export const riffleShuffle = (deck, shuffleCount) => {
   }
   return deck;
 };
+
+export const getDocsWithId = docs => {
+  return docs.map(doc => ({ ...doc.data(), _id: doc.id }));
+};

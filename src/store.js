@@ -31,8 +31,8 @@ const StateProvider = ({ children }) => {
         return { ...state, playerCount: action.data };
       case 'SET_PLAYER':
         return { ...state, player: action.data };
-      case 'SET_PLAYERS_AWAITING':
-        return { ...state, playersAwaiting: action.data };
+      case 'SET_OTHER_PLAYERS':
+        return { ...state, otherPlayers: action.data };
       default:
         throw new Error();
     }

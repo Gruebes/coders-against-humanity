@@ -23,51 +23,13 @@ function AwaitingPlayers(props) {
   const { classes } = props;
   const { dispatch, state } = useContext(store);
 
-  // get player and game
-  // useEffect(() => {
-  //   const getGameAndPlayer = async () => {
-  //     try {
-  //       const game = (await Games.doc(state.game._id).get()).data();
-  //       dispatch({ type: 'SET_GAME', data: game });
-  //       const player = (await Players.doc(state._playerId).get()).data();
-  //       dispatch({ type: 'SET_PLAYER', data: player });
-  //     } catch (err) {
-  //       logger.error(err, 'Could not set Current Player');
-  //       props.enqueueSnackbar('Could not set Current Player');
-  //     }
-  //   };
-  //   getGameAndPlayer();
-  // }, []);
-
-  // listen for players joining
-  useEffect(() => {
-    if (state.game._id) {
-      return Players.where('_gameId', '==', state.game._id).onSnapshot(
-        querySnapshot => {
-          // get player data
-          const docs = querySnapshot.docs
-            .map(doc => ({ ...doc.data(), _id: doc.id }))
-            // remove self from players list ??
-            .filter(p => p.id !== state._playerId);
-          // set players
-          dispatch({ type: 'SET_PLAYERS_AWAITING', data: docs });
-        },
-        err => {
-          logger.error(err, 'Error listening for players');
-          props.enqueueSnackbar('Error listening for players');
-        }
-      );
-    }
-  }, [dispatch, state.game._id]);
-
   const startGame = async () => {
-    // TODO: Show cards move to select White
-    return Games.doc(state.game._id).update({ state: gameStateTypes.ready });
+    return Games.doc(state.game._id).update({ state: gameStateTypes.initalizing });
   };
 
   return (
     <Paper className={classes.paper}>
-      {state.playersAwaiting.length ? (
+      {state.otherPlayers && state.otherPlayers.length ? (
         <TableContainer>
           <Table className={classes.table} aria-label="a dense table">
             <TableHead>
@@ -76,7 +38,7 @@ function AwaitingPlayers(props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {state.playersAwaiting.map(player => (
+              {state.otherPlayers.map(player => (
                 <TableRow key={player._id}>
                   <TableCell component="th" scope="row">
                     {player.displayName}
