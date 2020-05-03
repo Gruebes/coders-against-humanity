@@ -17,11 +17,14 @@ function CreateGame(props) {
 
   const handleCreate = async () => {
     dispatch({ type: 'SET_AWAITING_GAME', data: true });
+    logger.info({}, 'Creating Game Objects');
     const { gameData, playerData } = await createGameObjects();
     // set objects data on state
     dispatch({ type: 'SET_IS_HOST', data: true });
     dispatch({ type: 'SET_GAME', data: gameData });
+    dispatch({ type: 'SET_GAME_ID', data: gameData._id });
     dispatch({ type: 'SET_PLAYER', data: playerData });
+    dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
     logger.info({ _gameId: gameData._id, _playerId: playerData._id }, 'Created Game Objects');
     props.moveToGameCenter(gameData._id, playerData._id);
   };

@@ -10,7 +10,9 @@ function AppBar(props) {
   const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
-    watchOnlineStatus(currentUser.uid);
+    if (currentUser && currentUser.uid) {
+      watchOnlineStatus(currentUser.uid);
+    }
   }, []);
 
   return (

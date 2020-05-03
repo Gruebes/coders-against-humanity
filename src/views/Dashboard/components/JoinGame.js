@@ -6,7 +6,16 @@ import { AuthContext } from '../../Auth';
 import { store } from '../../../store';
 import { gameStateTypes } from '../../../enums';
 import { getPlayerObject } from '../../utils';
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core';
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from '@material-ui/core';
 import { withSnackbar } from 'notistack';
 import logger from '../../../logger';
 
@@ -47,7 +56,9 @@ function JoinGame(props) {
       const playerRef = await Players.add(getPlayerObject(currentUser, game._id));
       const playerData = { ...(await playerRef.get()).data(), _id: playerRef.id };
       dispatch({ type: 'SET_GAME', data: game });
+      dispatch({ type: 'SET_GAME_ID', data: game._id });
       dispatch({ type: 'SET_PLAYER', data: playerData });
+      dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
       props.moveToGameCenter(game._id, playerData._id);
     } catch (err) {
       logger.error(err, err.message);

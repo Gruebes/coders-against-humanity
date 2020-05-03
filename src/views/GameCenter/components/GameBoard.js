@@ -1,29 +1,13 @@
-import React, { useContext, useEffect } from 'react';
-import {
-  Button,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from '@material-ui/core';
-import firebase, { Games, Players } from '../../../firebase';
-import { store } from '../../../store';
+import React from 'react';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
 import Logger from '../../../logger';
-import { gameStateTypes } from '../../../enums';
+import PlayerCards from './PlayerCards';
 
 const logger = new Logger({ location: 'GameBoard' });
 function GameBoard(props) {
-  const { classes } = props;
-  const { dispatch, state } = useContext(store);
-  debugger;
-  return <div> Game Board</div>;
+  return <PlayerCards />;
 }
 
 const styles = theme => ({

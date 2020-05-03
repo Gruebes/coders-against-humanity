@@ -24,7 +24,7 @@ function AwaitingPlayers(props) {
   const { dispatch, state } = useContext(store);
 
   const startGame = async () => {
-    return Games.doc(state.game._id).update({ state: gameStateTypes.initalizing });
+    return Games.doc(state._gameId).update({ state: gameStateTypes.initalizing });
   };
 
   return (

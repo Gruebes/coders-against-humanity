@@ -34,7 +34,7 @@ function Dashboard(props) {
     if (_gameId && _playerId) {
       props.history.push({
         pathname: '/game-center',
-        search: `?gid=${_gameId}&pid=${_playerId}}`,
+        search: `?gid=${_gameId}&pid=${_playerId}`,
         state: { _gameId, _playerId },
       });
     } else {

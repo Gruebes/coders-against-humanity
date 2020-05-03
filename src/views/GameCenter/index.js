@@ -1,88 +1,140 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress, Container } from '@material-ui/core';
 import firebase, { BlackCards, Games, GameDecks, Players, WhiteCards } from '../../firebase';
 import { withRouter } from 'react-router-dom';
 import { store } from '../../store';
 import { gameStateTypes } from '../../enums';
 import AwaitingPlayers from './components/AwaitingPlayers';
 import GameBoard from './components/GameBoard';
-import { getDocsWithId, riffleShuffle } from '../utils';
+import { getDocsWithId } from '../utils';
 import { withSnackbar } from 'notistack';
-import logger from '../../logger';
+import Logger from '../../logger';
 import Promise from 'bluebird';
 
+const logger = new Logger({ location: 'GameCenter' });
 function GameCenter(props) {
   const { classes } = props;
   const { dispatch, state } = useContext(store);
 
-  // listen for game changes HYBRID -- delete after cloud function exitsts
+  // get player and game if missing (Rejoin)
   useEffect(() => {
-    if (state.game && state.game._id) {
-      return Games.doc(state.game._id).onSnapshot(
-        querySnapshot => {
+    const getGameAndPlayer = async () => {
+      try {
+        const { _gameId, _playerId } = props.location.state;
+        if (!_gameId || !_playerId) {
+          debugger;
+          throw new Error('No game or player ids on history.locaation.state');
+        }
+
+        const game = (await Games.doc(_gameId).get()).data();
+        dispatch({ type: 'SET_GAME', data: game });
+        dispatch({ type: 'SET_GAME_ID', data: _gameId });
+
+        const player = (await Players.doc(_playerId).get()).data();
+        dispatch({ type: 'SET_PLAYER', data: player });
+        dispatch({ type: 'SET_PLAYER_ID', data: _playerId });
+      } catch (err) {
+        debugger;
+        logger.error(err, 'Could not set Current Player');
+        props.enqueueSnackbar('Could not set Current Player', {
+          variant: 'error',
+        });
+      }
+    };
+    if (!state._gameId || !state._playerId) {
+      getGameAndPlayer();
+    }
+  }, []);
+
+  // listen for game changes -- remove cloud actions after cloud function exitsts
+  useEffect(() => {
+    if (state._gameId) {
+      return Games.doc(state._gameId).onSnapshot(
+        async querySnapshot => {
           const game = querySnapshot.data();
           dispatch({ type: 'SET_GAME', data: { ...game, _id: querySnapshot.id } });
+
+          /**
+           * cloud actions below
+           */
           if (game.state === gameStateTypes.initalizing) {
-            dealCards();
+            await dealCards();
           }
         },
         err => {
           logger.error(err, 'Error listening for players');
-          props.enqueueSnackbar('Error listening for players');
+          props.enqueueSnackbar('Error listening for players', {
+            variant: 'error',
+          });
         }
       );
     }
-  }, [state.game._id, state.player._id]);
+  }, [state._gameId]);
+
+  // listen for player changes
+  useEffect(() => {
+    if (state.player && state._playerId && state.game && state._gameId) {
+      return Players.where('_gameId', '==', state._gameId).onSnapshot(
+        querySnapshot => {
+          const allPlayers = getDocsWithId(querySnapshot.docs);
+          const currentPlayer = allPlayers.find(p => p._id === state._playerId);
+          const otherPlayers = allPlayers.filter(p => p._id !== state._playerId);
+          // TODO's
+          //  check for player card changes and set them (blacks won, currnt turn, card czar, etc)
+          if (otherPlayers && otherPlayers.length) {
+            dispatch({ type: 'SET_OTHER_PLAYERS', data: otherPlayers });
+          }
+          // check for current player changes and update those. (cards, blacks won, currnt turn, card czar, etc)
+          if (currentPlayer) {
+            dispatch({ type: 'SET_PLAYER', data: currentPlayer });
+          }
+
+          /**
+           * cloud actions below
+           */
+        },
+        err => {
+          logger.error(err, 'Error listening for players');
+          props.enqueueSnackbar('Error listening for players', {
+            variant: 'error',
+          });
+        }
+      );
+    }
+  }, [state._gameId, state._playerId]);
 
   /**
-   * CLOUD FUNCTIONS
+   * CLOUD HELPER FUNCTIONS
    */
-  // listen for game STATE changes
-
-  // // listen for game changes
-  // useEffect(() => {
-  //   if (state.game && state.game._id && state.player && state.player.isHost) {
-  //     return Games.doc(state.game._id).onSnapshot(
-  //       querySnapshot => {
-  //         const game = querySnapshot.data();
-  //         if (game.state === gameStateTypes.initalizing) {
-  //           dealCards();
-  //         }
-  //       },
-  //       err => {
-  //         log.error(err, 'Error listening for players');
-  //       }
-  //     );
-  //   }
-  // }, [state.game, state.player]);
-
   const dealCards = async () => {
     const config = (await firebase.firestore().collection('/config').get()).docs.map(doc => ({
       ...doc.data(),
       _id: doc.id,
     }))[0];
-    // shuffle
-    // TODO: find new shuffle
-    // Also, dont need to set the shuffled indexes on the gamDeck ledger
-    const shuffledBlack = riffleShuffle(getCardIndexes(config.blackCount), 4);
-    const shuffledWhite = riffleShuffle(getCardIndexes(config.whiteCount), 5);
+
+    const shuffledBlack = fisherYatesShuffle(getCardIndexes(config.blackCount));
+    const shuffledWhite = fisherYatesShuffle(getCardIndexes(config.whiteCount));
     // create game deck
     const gameDeck = getGameDeck(shuffledBlack, shuffledWhite);
     // set players white cards
     await createPlayersWhiteCardsMap(gameDeck, shuffledWhite);
+
+    const blackIndex = shuffledBlack[0];
+    const blackCard = (await BlackCards.doc(`${blackIndex}`).get()).data();
+    // mark this card on game deck
+    gameDeck.blackCards[blackIndex] = true;
     // update black card on game
-    await Games.doc(state.game._id).update({
-      'currentTurn.blackCard': shuffledBlack[0],
-      // [`players.${state.player._id}`]: true,
+    await Games.doc(state._gameId).update({
+      'currentTurn.blackCard': blackCard,
       state: gameStateTypes.ready,
     });
     // set game deck
-    return GameDecks.doc(state.game._id).set(gameDeck);
+    return GameDecks.doc(state._gameId).set(gameDeck);
   };
 
   const createPlayersWhiteCardsMap = async (gameDeck, shuffledWhite) => {
-    const players = await Players.where('_gameId', '==', state.game._id).get();
+    const players = await Players.where('_gameId', '==', state._gameId).get();
     const batch = firebase.firestore().batch();
 
     await Promise.each(players.docs, async player => {
@@ -115,59 +167,13 @@ function GameCenter(props) {
    * end of CLOUD FUNCTIONS
    */
   ////////////////////////////////////////////////////////////////////////////////
-  /**
-   * Game Center Below
-   */
-
-  // listen for game changes -- TODO: use after cloud function exists
-  // useEffect(() => {
-  //   if (state.game && state.game._id && state.player && state.player.isHost) {
-  //     return Games.doc(state.game._id).onSnapshot(
-  //       querySnapshot => {
-  //         // get player data
-  //         const game = querySnapshot.data();
-  //         dispatch({ type: 'SET_GAME', data: game });
-  //       },
-  //       err => {
-  //         logger.error(err, 'Error listening for players');
-  //         props.enqueueSnackbar('Error listening for players');
-  //       }
-  //     );
-  //   }
-  // }, [state.game, state.player]);
-
-  // listen for player changes
-  useEffect(() => {
-    if (state.player && state.player._id && state.game && state.game._id) {
-      return Players.where('_gameId', '==', state.game._id).onSnapshot(
-        querySnapshot => {
-          const allPlayers = getDocsWithId(querySnapshot.docs);
-          const currentPlayer = allPlayers.find(p => p._id === state.player._id);
-          const otherPlayers = allPlayers.filter(p => p._id !== state.player._id);
-          // TODO's
-          //  check for player card changes and set them (blacks won, currnt turn, card czar, etc)
-          if (otherPlayers && otherPlayers.length) {
-            dispatch({ type: 'SET_OTHER_PLAYERS', data: otherPlayers });
-          }
-          // check for current player changes and update those. (cards, blacks won, currnt turn, card czar, etc)
-          if (currentPlayer) {
-            dispatch({ type: 'SET_PLAYER', data: currentPlayer });
-          }
-        },
-        err => {
-          logger.error(err, 'Error listening for players');
-          props.enqueueSnackbar('Error listening for players');
-        }
-      );
-    }
-  }, [state.game._id, state.player._id]);
 
   // TODO:
   // if game is open, show awaiting players
   // if game is initalizing => show loader
   // if game is anything else => show game board for now
   return (
-    <main className={classes.main}>
+    <Container>
       {state.game && state.game.state === gameStateTypes.open ? (
         <AwaitingPlayers />
       ) : !state.game || state.game.state === gameStateTypes.initalizing ? (
@@ -177,7 +183,7 @@ function GameCenter(props) {
       ) : (
         <GameBoard />
       )}
-    </main>
+    </Container>
   );
 }
 
@@ -204,4 +210,29 @@ const getCardIndexes = count => {
     indexArray.push(i);
   }
   return indexArray;
+};
+
+// const shuffle = deck => {
+//   let m = deck.length,
+//     i;
+//   while (m) {
+//     i = Math.floor(Math.random() * m--);
+
+//     [deck[m], deck[i]] = [deck[i], deck[m]];
+//   }
+//   return deck;
+// };
+
+const fisherYatesShuffle = deck => {
+  let theLength = deck.length - 1;
+  let toSwap;
+  let tempCard;
+
+  for (let i = theLength; i > 0; i--) {
+    toSwap = Math.floor(Math.random() * i);
+    tempCard = deck[i];
+    deck[i] = deck[toSwap];
+    deck[toSwap] = tempCard;
+  }
+  return deck;
 };
