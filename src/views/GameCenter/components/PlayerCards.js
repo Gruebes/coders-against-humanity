@@ -42,28 +42,32 @@ function PlayerCards(props) {
   }, [state.player && state.player.whiteCards]);
 
   return (
-    <div>
+    <div className={classes.playerCardContainer}>
       {bottomRowCards && topRowCards && (
-        <Grid container className={classes.root} spacing={2}>
-          <Grid container justify="center" spacing={2}>
-            {topRowCards.map(card => (
-              <GameCard
-                key={card.localIndex}
-                classes={classes}
-                card={card}
-                handlePickWhite={handlePickWhite}
-              />
-            ))}
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Grid container>
+              {topRowCards.map(card => (
+                <GameCard
+                  key={card.localIndex}
+                  classes={classes}
+                  card={card}
+                  handlePickWhite={handlePickWhite}
+                />
+              ))}
+            </Grid>
           </Grid>
-          <Grid container justify="center" spacing={2}>
-            {bottomRowCards.map(card => (
-              <GameCard
-                key={card.localIndex}
-                classes={classes}
-                card={card}
-                handlePickWhite={handlePickWhite}
-              />
-            ))}
+          <Grid item xs={12}>
+            <Grid container>
+              {bottomRowCards.map(card => (
+                <GameCard
+                  key={card.localIndex}
+                  classes={classes}
+                  card={card}
+                  handlePickWhite={handlePickWhite}
+                />
+              ))}
+            </Grid>
           </Grid>
         </Grid>
       )}
@@ -73,7 +77,7 @@ function PlayerCards(props) {
 
 const GameCard = props => {
   return (
-    <Grid item>
+    <Grid item xs={2}>
       <Paper
         classes={{ root: props.classes.card }}
         onClick={() => props.handlePickWhite(props.card.data)}
@@ -87,13 +91,19 @@ const GameCard = props => {
 };
 
 const styles = theme => ({
+  playerCardContainer: {
+    position: 'absolute',
+    width: '100%',
+    maxWidth: '120rem',
+    bottom: '2rem',
+    left: '5rem',
+  },
   card: {
-    marginTop: theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
     padding: `${theme.spacing(2)}px ${theme.spacing(3)}px ${theme.spacing(3)}px`,
     width: '17rem',
-    height: '27rem',
+    height: '25rem',
     alignItems: 'flex-start',
   },
   cardText: {

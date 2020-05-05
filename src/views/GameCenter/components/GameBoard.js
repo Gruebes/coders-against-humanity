@@ -10,14 +10,6 @@ function GameBoard(props) {
   return <PlayerCards />;
 }
 
-const styles = theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: `${theme.spacing(2)}px ${theme.spacing(3)}px ${theme.spacing(3)}px`,
-  },
-});
+const styles = theme => ({});
 
 export default withRouter(withStyles(styles)(withSnackbar(GameBoard)));

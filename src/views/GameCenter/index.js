@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { CircularProgress, Container } from '@material-ui/core';
-import firebase, { BlackCards, Games, GameDecks, Players, WhiteCards } from '../../firebase';
+import firebase, { BlackCards, Games, GameDecks, Players, WhiteCards } from 'db';
 import { withRouter } from 'react-router-dom';
 import { store } from '../../store';
 import { gameStateTypes } from '../../enums';
