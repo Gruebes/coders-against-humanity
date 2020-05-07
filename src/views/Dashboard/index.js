@@ -1,16 +1,16 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withRouter } from 'react-router-dom';
-import { store } from '../../store';
-import { Games, Players } from '../../firebase';
-import { gameStateTypes } from '../../enums';
+import { store } from 'store';
+import { Games } from 'db';
+import { gameStateTypes } from 'enums';
 import { withSnackbar } from 'notistack';
-import Logger from '../../logger';
+import { logger } from 'logger';
 
 import CreateGame from './components/CreateGame';
 import JoinGame from './components/JoinGame';
 
-const logger = new Logger({ location: 'Dashboard' });
+const log = logger.child({ component: 'Dashboard' });
 function Dashboard(props) {
   const { classes } = props;
   const { dispatch } = useContext(store);
@@ -25,7 +25,7 @@ function Dashboard(props) {
         dispatch({ type: 'SET_OPEN_GAMES', data: docs });
       },
       err => {
-        logger.error(err, 'Error listening to game.state === open');
+        log.error(err, 'Error listening to game.state === open');
         props.enqueueSnackbar('Error listening to gameState');
       }
     );

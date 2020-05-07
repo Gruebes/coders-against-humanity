@@ -15,16 +15,17 @@ import { store } from 'store';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import Logger from '../../../logger';
-import { gameStateTypes } from '../../../enums';
+import { logger } from 'logger';
+import { gameStateTypes } from 'enums';
 
-const logger = new Logger({ location: 'AwaitingPlayers' });
+const log = logger.child({ component: 'AwaitingPlayers' });
+
 function AwaitingPlayers(props) {
   const { classes } = props;
   const { state } = useContext(store);
 
   const startGame = async () => {
-    logger.info(
+    log.info(
       { function: 'startGame', stateChange: gameStateTypes.initalizing, game_id: state._gameId },
       'starting new game'
     );

@@ -5,9 +5,9 @@ import { GameContext } from '../gameContext.js';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import Logger from 'logger';
+import { logger } from 'logger';
 
-const logger = new Logger({ location: 'LeaderBoard' });
+const log = logger.child({ component: 'LeaderBoard' });
 function LeaderBoard(props) {
   const { state: gameState } = useContext(GameContext);
   const { state } = useContext(store);

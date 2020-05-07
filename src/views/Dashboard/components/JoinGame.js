@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
-import firebase, { Games, Players } from '../../../firebase';
+import firebase, { Games, Players } from 'db';
 import { withRouter } from 'react-router-dom';
 import { AuthContext } from '../../Auth';
-import { store } from '../../../store';
-import { gameStateTypes } from '../../../enums';
+import { store } from 'store';
+import { gameStateTypes } from 'enums';
 import { getPlayerObject } from '../../utils';
 import {
   Button,
@@ -17,9 +17,9 @@ import {
   Paper,
 } from '@material-ui/core';
 import { withSnackbar } from 'notistack';
-import Logger from '../../../logger';
+import { logger } from 'logger';
 
-const logger = new Logger({ location: 'JoinGame' });
+const log = logger.child({ component: 'JoinGame' });
 function JoinGame(props) {
   const { classes } = props;
   const { currentUser } = useContext(AuthContext);
@@ -34,7 +34,7 @@ function JoinGame(props) {
         dispatch({ type: 'SET_OPEN_GAMES', data: docs });
       },
       err => {
-        logger.error(err, err.message);
+        log.error(err, err.message);
         return props.enqueueSnackbar(err.message, {
           variant: 'error',
         });
@@ -47,7 +47,7 @@ function JoinGame(props) {
     try {
       await updatePlayerCount(game);
     } catch (err) {
-      logger.error(err, err.message);
+      log.error(err, err.message);
       return props.enqueueSnackbar(err.message, {
         variant: 'error',
       });
@@ -62,7 +62,7 @@ function JoinGame(props) {
       dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
       props.moveToGameCenter(game._id, playerData._id);
     } catch (err) {
-      logger.error(err, err.message);
+      log.error(err, err.message);
       return props.enqueueSnackbar(err.message, {
         variant: 'error',
       });

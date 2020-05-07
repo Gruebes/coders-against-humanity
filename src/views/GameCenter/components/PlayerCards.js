@@ -6,10 +6,11 @@ import { GameContext } from '../gameContext.js';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import Logger from 'logger';
+import { logger } from 'logger';
 import SubmitCards from './SubmitCards';
 
-const logger = new Logger({ location: 'PlayerCards' });
+const log = logger.child({ component: 'PlayerCards' });
+
 function PlayerCards(props) {
   const { classes } = props;
   const { dispatch: gameDispatch, state: gameState } = useContext(GameContext);
@@ -70,7 +71,7 @@ function PlayerCards(props) {
         gameDispatch({ type: 'SET_TOP_ROW', data: topRows });
         gameDispatch({ type: 'SET_BOTTOM_ROW', data: bottomRow });
       } catch (err) {
-        logger.error(err, 'Failed to set players cards');
+        log.error(err, 'Failed to set players cards');
       }
     }
   }, [state.player && state.player.whiteCards]);

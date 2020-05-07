@@ -3,16 +3,16 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { CircularProgress, Container } from '@material-ui/core';
 import firebase, { BlackCards, Games, GameDecks, Players } from 'db';
 import { withRouter } from 'react-router-dom';
-import { store } from '../../store';
-import { gameStateTypes } from '../../enums';
+import { store } from 'store';
+import { gameStateTypes } from 'enums';
 import AwaitingPlayers from './components/AwaitingPlayers';
 import GameBoard from './components/GameBoard';
 import { getDocsWithId } from '../utils';
 import { withSnackbar } from 'notistack';
-import Logger from '../../logger';
+import { logger } from 'logger';
 import Promise from 'bluebird';
 
-const logger = new Logger({ location: 'GameCenter' });
+const log = logger.child({ component: 'GameCenter' });
 function GameCenter(props) {
   const { dispatch, state } = useContext(store);
 
@@ -35,8 +35,12 @@ function GameCenter(props) {
         const player = (await Players.doc(_playerId).get()).data();
         dispatch({ type: 'SET_PLAYER', data: player });
         dispatch({ type: 'SET_PLAYER_ID', data: _playerId });
+        log.info(
+          { function: 'getGameAndPlayer', _gameId, _playerId },
+          'reloading game from url params'
+        );
       } catch (err) {
-        logger.error(err, 'Could not set Current Player');
+        log.error(err, 'Could not set Current Player');
         props.enqueueSnackbar('Could not set Current Player', {
           variant: 'error',
         });
@@ -63,7 +67,7 @@ function GameCenter(props) {
           }
         },
         err => {
-          logger.error(err, 'Error listening for players');
+          log.error(err, 'Error listening for players');
           props.enqueueSnackbar('Error listening for players', {
             variant: 'error',
           });
@@ -93,9 +97,15 @@ function GameCenter(props) {
           /**
            * cloud actions below
            */
+
+          // check to see if allPlayers have cards submitted
+          // if so, set the game state to selectBlack
+          //
+          //
+          //
         },
         err => {
-          logger.error(err, 'Error listening for players');
+          log.error(err, 'Error listening for players');
           props.enqueueSnackbar('Error listening for players', {
             variant: 'error',
           });

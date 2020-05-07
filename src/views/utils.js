@@ -17,6 +17,7 @@ export const getPlayerObject = (currentUser, _gameId, isHost = false) => {
     _gameId,
     isHost,
     created_at: firebase.firestore.Timestamp.now(),
+    ended_at: null,
   };
 };
 
@@ -34,6 +35,7 @@ export const getGameObject = (currentUser, cardsToWin, playerLimit, newPlayerId)
     state: gameStateTypes.open,
     totalPlayers: 1,
     created_at: firebase.firestore.Timestamp.now(),
+    ended_at: null,
   };
 };
 

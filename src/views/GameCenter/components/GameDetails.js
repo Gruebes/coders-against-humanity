@@ -7,11 +7,11 @@ import { GameContext } from '../gameContext.js';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import Logger from 'logger';
+import { logger } from 'logger';
 
-const logger = new Logger({ location: 'GameDetails' });
+const log = logger.child({ component: 'GameDetails' });
+
 function GameDetails(props) {
-  const { classes } = props;
   const { dispatch: gameDispatch, state: gameState } = useContext(GameContext);
   const { state } = useContext(store);
 
@@ -20,7 +20,7 @@ function GameDetails(props) {
       try {
         gameDispatch({ type: 'SET_BLACK_CARD', data: state.game.currentTurn.blackCard });
       } catch (err) {
-        logger.error(err, 'Failed to SET_BLACK_CARD');
+        log.child(err, 'Failed to SET_BLACK_CARD');
       }
     }
   }, [gameState.selectedCards, state.game.currentTurn.blackCard]);

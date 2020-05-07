@@ -6,9 +6,9 @@ import { Button } from '@material-ui/core';
 import Slide from '@material-ui/core/Slide';
 import { GameContext } from '../gameContext.js';
 import { store } from 'store';
-import Logger from '../../../logger';
+import { logger } from 'logger';
 
-const logger = new Logger({ location: 'SubmitCards' });
+const log = logger.child({ component: 'SubmitCards' });
 function SubmitCards(props) {
   const { classes } = props;
   const { state } = useContext(store);
@@ -18,10 +18,10 @@ function SubmitCards(props) {
     try {
       const player = await Players.doc(state._gameId).get();
       await player.update({ selectedCards: gameState.selectedCards });
-      logger.info({}, 'Submitting cards');
+      log.info({}, 'Submitting cards');
       gameDispatch({ type: 'SET_SELECTED_CARDS', data: {} });
     } catch (err) {
-      logger.error(err, 'error submitting cards');
+      log.error(err, 'error submitting cards');
       props.enqueueSnackbar(err.message, {
         variant: 'error',
       });

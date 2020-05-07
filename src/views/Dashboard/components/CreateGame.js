@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 import { Button, FormControl, InputLabel, MenuItem, Select, Paper } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { Games, Players } from '../../../firebase';
+import { Games, Players } from 'db';
 import { withRouter } from 'react-router-dom';
 import { AuthContext } from '../../Auth';
-import { store } from '../../../store';
+import { store } from 'store';
 import { getGameObject, getPlayerObject } from '../../utils';
-import Logger from '../../../logger';
+import { logger } from 'logger';
 
-const logger = new Logger({ location: 'CreateGame' });
+const log = logger.child({ component: 'CreateGame' });
 
 function CreateGame(props) {
   const { classes } = props;
@@ -17,7 +17,7 @@ function CreateGame(props) {
 
   const handleCreate = async () => {
     dispatch({ type: 'SET_AWAITING_GAME', data: true });
-    logger.info({}, 'Creating Game Objects');
+    log.info({}, 'Creating Game Objects');
     const { gameData, playerData } = await createGameObjects();
     // set objects data on state
     dispatch({ type: 'SET_IS_HOST', data: true });
@@ -25,7 +25,7 @@ function CreateGame(props) {
     dispatch({ type: 'SET_GAME_ID', data: gameData._id });
     dispatch({ type: 'SET_PLAYER', data: playerData });
     dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
-    logger.info({ _gameId: gameData._id, _playerId: playerData._id }, 'Created Game Objects');
+    log.info({ _gameId: gameData._id, _playerId: playerData._id }, 'Created Game Objects');
     props.moveToGameCenter(gameData._id, playerData._id);
   };
 
