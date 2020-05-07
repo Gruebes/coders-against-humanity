@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { CircularProgress, Container } from '@material-ui/core';
-import firebase, { BlackCards, Games, GameDecks, Players, WhiteCards } from 'db';
+import firebase, { BlackCards, Games, GameDecks, Players } from 'db';
 import { withRouter } from 'react-router-dom';
 import { store } from '../../store';
 import { gameStateTypes } from '../../enums';
@@ -14,14 +14,15 @@ import Promise from 'bluebird';
 
 const logger = new Logger({ location: 'GameCenter' });
 function GameCenter(props) {
-  const { classes } = props;
   const { dispatch, state } = useContext(store);
 
   // get player and game if missing (Rejoin)
   useEffect(() => {
     const getGameAndPlayer = async () => {
       try {
-        const { _gameId, _playerId } = props.location.state;
+        const regex = /\?gid=(.*)&pid=(.*)/gm;
+
+        const [, _gameId, _playerId] = regex.exec(props.location.search);
         if (!_gameId || !_playerId) {
           debugger;
           throw new Error('No game or player ids on history.locaation.state');
@@ -35,7 +36,6 @@ function GameCenter(props) {
         dispatch({ type: 'SET_PLAYER', data: player });
         dispatch({ type: 'SET_PLAYER_ID', data: _playerId });
       } catch (err) {
-        debugger;
         logger.error(err, 'Could not set Current Player');
         props.enqueueSnackbar('Could not set Current Player', {
           variant: 'error',

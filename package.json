@@ -15,6 +15,7 @@
     "@types/react-dom": "^16.9.6",
     "@types/react-router-dom": "^5.1.4",
     "bluebird": "^3.7.2",
+    "classnames": "^2.2.6",
     "global": "^4.4.0",
     "notistack": "^0.9.11",
     "react": "^16.13.1",

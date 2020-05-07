@@ -5,11 +5,12 @@ import { store } from '../../store';
 import { Games, Players } from '../../firebase';
 import { gameStateTypes } from '../../enums';
 import { withSnackbar } from 'notistack';
-import logger from '../../logger';
+import Logger from '../../logger';
 
 import CreateGame from './components/CreateGame';
 import JoinGame from './components/JoinGame';
 
+const logger = new Logger({ location: 'Dashboard' });
 function Dashboard(props) {
   const { classes } = props;
   const { dispatch } = useContext(store);

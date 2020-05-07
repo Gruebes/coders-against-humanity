@@ -17,8 +17,9 @@ import {
   Paper,
 } from '@material-ui/core';
 import { withSnackbar } from 'notistack';
-import logger from '../../../logger';
+import Logger from '../../../logger';
 
+const logger = new Logger({ location: 'JoinGame' });
 function JoinGame(props) {
   const { classes } = props;
   const { currentUser } = useContext(AuthContext);

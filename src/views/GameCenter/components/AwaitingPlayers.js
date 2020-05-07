@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import {
   Button,
   CircularProgress,
@@ -10,8 +10,8 @@ import {
   TableRow,
   Paper,
 } from '@material-ui/core';
-import firebase, { Games, Players } from '../../../firebase';
-import { store } from '../../../store';
+import { Games } from 'db';
+import { store } from 'store';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
@@ -21,9 +21,13 @@ import { gameStateTypes } from '../../../enums';
 const logger = new Logger({ location: 'AwaitingPlayers' });
 function AwaitingPlayers(props) {
   const { classes } = props;
-  const { dispatch, state } = useContext(store);
+  const { state } = useContext(store);
 
   const startGame = async () => {
+    logger.info(
+      { function: 'startGame', stateChange: gameStateTypes.initalizing, game_id: state._gameId },
+      'starting new game'
+    );
     return Games.doc(state._gameId).update({ state: gameStateTypes.initalizing });
   };
 

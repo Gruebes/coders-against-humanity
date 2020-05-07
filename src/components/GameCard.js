@@ -1,18 +1,33 @@
 import React from 'react';
-import { Grid, Paper, Typography } from '@material-ui/core';
+import classnames from 'classnames';
+import { Badge, Grid, Paper, Typography } from '@material-ui/core';
+import ButtonBase from '@material-ui/core/ButtonBase';
 import withStyles from '@material-ui/core/styles/withStyles';
-import Logger from '../../../logger';
-import { GameCard } from 'components';
 
-const logger = new Logger({ location: 'GameCard' });
 const GameCard = props => {
   return (
-    <Grid item xs={2}>
-      <Paper classes={{ root: props.classes.card }} onClick={() => props.onClick(props.card.data)}>
-        <Typography classes={{ root: props.classes.cardText }} align={'left'}>
-          {props.card.data.text}
-        </Typography>
-      </Paper>
+    <Grid item xs={2} spacing={3}>
+      <Badge
+        badgeContent={props.badgeContent}
+        color="secondary"
+        classes={{ anchorOriginTopRightRectangle: props.classes.badge }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <ButtonBase>
+          <Paper
+            classes={{
+              root: classnames(props.classes.card, {
+                [props.classes[props.color]]: true,
+              }),
+            }}
+            onClick={() => props.onClick && props.onClick(props.card.data)}
+          >
+            <Typography classes={{ root: props.classes.cardText }} align={'left'}>
+              {props.children(props.card)}
+            </Typography>
+          </Paper>
+        </ButtonBase>
+      </Badge>
     </Grid>
   );
 };
@@ -29,6 +44,17 @@ const styles = theme => ({
   cardText: {
     fontWeight: theme.typography.fontWeightBold,
     fontSize: '1.35rem',
+  },
+  black: {
+    backgroundColor: '#000000',
+    color: '#ffffff',
+  },
+  white: {
+    backgroundColor: '#ffffff',
+    color: '#000000',
+  },
+  badge: {
+    transform: 'scale(1.2) translate(50%, -50%)',
   },
 });
 
