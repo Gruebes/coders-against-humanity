@@ -3,21 +3,18 @@ import firebase from '../firebase';
 
 export const getPlayerObject = (currentUser, _gameId, isHost = false) => {
   return {
+    _gameId,
     blackCardsWon: 0,
+    created_at: firebase.firestore.Timestamp.now(),
     displayName: currentUser.displayName,
+    ended_at: null,
+    isHost,
     playerState: {
       connected: 1,
     },
-    selectedWhiteCards: {
-      1: null,
-      2: null,
-      3: null,
-    },
+    selectedCards: {},
     user_uid: currentUser.uid,
-    _gameId,
-    isHost,
-    created_at: firebase.firestore.Timestamp.now(),
-    ended_at: null,
+    whiteCards: {},
   };
 };
 

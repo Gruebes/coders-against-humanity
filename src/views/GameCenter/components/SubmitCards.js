@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
+import Promise from 'bluebird';
 import { Players } from 'db';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import Slide from '@material-ui/core/Slide';
 import { GameContext } from '../gameContext.js';
 import { store } from 'store';
@@ -16,8 +17,9 @@ function SubmitCards(props) {
 
   const handleSubmitCards = async () => {
     try {
-      const player = await Players.doc(state._gameId).get();
-      await player.update({ selectedCards: gameState.selectedCards });
+      const playerRef = Players.doc(state._playerId);
+      // const player = await playerRef.get();
+      await playerRef.update({ selectedCards: gameState.selectedCards });
       log.info({}, 'Submitting cards');
       gameDispatch({ type: 'SET_SELECTED_CARDS', data: {} });
     } catch (err) {
@@ -30,31 +32,33 @@ function SubmitCards(props) {
 
   return (
     <Slide
-      className={classes.buttonContainer}
+      className={classes.slider}
       direction={'up'}
       in={gameState.showSubmit}
       mountOnEnter
       unmountOnExit
     >
-      <Button
-        classes={{ root: classes.button }}
-        color={'default'}
-        variant={'cointained'}
-        onClick={handleSubmitCards}
-      >
-        submit
-      </Button>
+      <Box alignContent="center">
+        <Button
+          classes={{ root: classes.button }}
+          color={'default'}
+          variant={'cointained'}
+          onClick={handleSubmitCards}
+        >
+          submit
+        </Button>
+      </Box>
     </Slide>
   );
 }
 
 const styles = theme => ({
-  buttonContainer: {
-    position: 'absolute',
-    bottom: '3rem',
-    left: '50%',
-    marinBottom: '10rem',
-  },
+  // slider: {
+  //   bottom: '3rem',
+  //   width: '100%',
+  //   position: 'absolute',
+  //   left: 'calc(50vw - 15.5rem)',
+  // },
   button: {
     fontSize: '2rem',
     color: 'white',
@@ -62,6 +66,7 @@ const styles = theme => ({
     '&:hover': {
       backgroundColor: theme.palette.secondary.dark,
     },
+    width: '25%',
   },
 });
 

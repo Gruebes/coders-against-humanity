@@ -77,7 +77,7 @@ function JoinGame(props) {
         if (newPlayerCount > game.data().playerLimit) {
           throw new Error('Opps! Too many players in this game, try another');
         }
-        transaction.update(gameRef, { totalPlayers: newPlayerCount });
+        return transaction.update(gameRef, { totalPlayers: newPlayerCount });
       });
     });
   };

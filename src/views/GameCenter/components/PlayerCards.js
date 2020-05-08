@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { Grid } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { GameCard } from 'components';
 import { store } from 'store';
 import { GameContext } from '../gameContext.js';
@@ -122,9 +122,7 @@ function PlayerCards(props) {
               ))}
             </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <SubmitCards />
-          </Grid>
+          <SubmitCards />
         </Grid>
       )}
     </>

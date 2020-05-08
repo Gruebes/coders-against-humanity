@@ -58,6 +58,9 @@ function GameCenter(props) {
         async querySnapshot => {
           const game = querySnapshot.data();
           dispatch({ type: 'SET_GAME', data: { ...game, _id: querySnapshot.id } });
+          if (game.state === gameStateTypes.chooseBlack) {
+            dispatch({ type: 'SHOW_CHOOSE_BLACK', data: true });
+          }
 
           /**
            * cloud actions below
@@ -80,7 +83,7 @@ function GameCenter(props) {
   useEffect(() => {
     if (state.player && state._playerId && state.game && state._gameId) {
       return Players.where('_gameId', '==', state._gameId).onSnapshot(
-        querySnapshot => {
+        async querySnapshot => {
           const allPlayers = getDocsWithId(querySnapshot.docs);
           const currentPlayer = allPlayers.find(p => p._id === state._playerId);
           const otherPlayers = allPlayers.filter(p => p._id !== state._playerId);
@@ -99,10 +102,51 @@ function GameCenter(props) {
            */
 
           // check to see if allPlayers have cards submitted
-          // if so, set the game state to selectBlack
-          //
-          //
-          //
+
+          if (!querySnapshot.size) return;
+
+          const players = querySnapshot.docs.map(doc => ({ ...doc.data(), _id: doc.id }));
+          const gameId = players[0]._gameId;
+          const allPlayersSubmitted = players.every(p => Object.keys(p.selectedCards).length);
+          const gameRef = firebase.firestore().collection('/games').doc(gameId);
+          const gameData = (await gameRef.get()).data();
+          debugger;
+
+          if (gameData.state === gameStateTypes.chooseWhite && allPlayersSubmitted) {
+            // if so, set the game state to selectBlack
+            await gameRef.update({ state: gameStateTypes.chooseBlack });
+          }
+          // handle trading cards with cloud dealer
+          const docChanges = querySnapshot.docChanges();
+
+          await Promise.each(docChanges, async change => {
+            const playerChange = change.doc.data();
+
+            const selectedCards = Object.values(playerChange.selectedCards);
+            const cardsToReplace = Object.values(playerChange.whiteCards).filter(card =>
+              selectedCards.find(c => c.index === card.index)
+            );
+
+            await Promise.each(cardsToReplace, async card => {
+              // transaction for switching cards between ledger and player
+              const gameDeckRef = firebase.firestore().collection('/game_decks').doc(gameId);
+              return firebase.firestore().runTransaction(async t => {
+                return t.get(gameDeckRef).then(doc => {
+                  const gameDeck = doc.data();
+                  // get the first three white cards from ledger
+                  // mark the new cards taken on the ledger
+
+                  // t.get those cards
+                  // replace those on the players deck
+
+                  // update that on the players doc
+                  // update ledger
+                  return;
+                });
+              });
+            });
+            //
+          });
         },
         err => {
           log.error(err, 'Error listening for players');
@@ -134,13 +178,13 @@ function GameCenter(props) {
     const blackCard = (await BlackCards.doc(`${blackIndex}`).get()).data();
     // mark this card on game deck
     gameDeck.blackCards[blackIndex] = true;
-    // update black card on game
-    await Games.doc(state._gameId).update({
-      'currentTurn.blackCard': blackCard,
-      state: gameStateTypes.ready,
-    });
     // set game deck
-    return GameDecks.doc(state._gameId).set(gameDeck);
+    await GameDecks.doc(state._gameId).set(gameDeck);
+    // update black card on game
+    return Games.doc(state._gameId).update({
+      'currentTurn.blackCard': blackCard,
+      state: gameStateTypes.chooseWhite,
+    });
   };
 
   const createPlayersWhiteCardsMap = async (gameDeck, shuffledWhite) => {
