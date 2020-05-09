@@ -42,7 +42,7 @@ export default firebase;
 
 export const BlackCards = firebase.firestore().collection('/black_cards');
 export const Games = firebase.firestore().collection('/games');
-export const GameDecks = firebase.firestore().collection('/game_decks');
+export const GameLedgers = firebase.firestore().collection('/game_ledgers');
 export const GlobalChat = firebase.firestore().collection('/global-chat');
 export const Players = firebase.firestore().collection('/players');
 export const Users = firebase.firestore().collection('/users');
