@@ -29,6 +29,7 @@ export const getGameObject = (currentUser, cardsToWin, playerLimit, newPlayerId)
     currentTurn: { player: newPlayerId, blackCard: null },
     host_user: { uid, email, displayName },
     playerLimit,
+    players: {},
     state: gameStateTypes.open,
     totalPlayers: 1,
     created_at: firebase.firestore.Timestamp.now(),

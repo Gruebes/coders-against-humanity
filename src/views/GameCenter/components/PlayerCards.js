@@ -45,31 +45,14 @@ function PlayerCards(props) {
     gameDispatch({ type: 'SHOW_SUBMIT', data: enableSubmit });
   };
 
-  const handleSubmitChoices = cardData => {
-    // const playerRef = Players.doc(state._playerId);
-    // TODO: Need to keep track of number of cards selected according to the current black cards
-    // once all of the cards are chosen, update player object with choices
-    // (the action above will trigger the player cloud function watcher to trade cards for the selected)
-  };
-
   useEffect(() => {
     if (state.player && state.player.whiteCards) {
       try {
-        const { bottomRow, topRows } = Object.entries(state.player.whiteCards).reduce(
-          (acc, [localIndex, data]) => {
-            const card = { localIndex, data };
-            if (acc.topRows.length < 5) {
-              acc.topRows.push(card);
-            } else {
-              acc.bottomRow.push(card);
-            }
-            return acc;
-          },
-          { topRows: [], bottomRow: [] }
-        );
-
-        gameDispatch({ type: 'SET_TOP_ROW', data: topRows });
-        gameDispatch({ type: 'SET_BOTTOM_ROW', data: bottomRow });
+        const cards = Object.entries(state.player.whiteCards).map(([localIndex, data]) => ({
+          localIndex,
+          data: { ...data, flipped: true },
+        }));
+        gameDispatch({ type: 'SET_PLAYER_CARDS', data: cards });
       } catch (err) {
         log.error(err, 'Failed to set players cards');
       }
@@ -92,11 +75,11 @@ function PlayerCards(props) {
 
   return (
     <>
-      {gameState.bottomRowCards && gameState.topRowCards && (
+      {gameState.playerCards && (
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Grid container>
-              {gameState.topRowCards.map(card => (
+          <Grid item xs={10}>
+            <Box classes={{ root: classes.playerCardContainer }}>
+              {gameState.playerCards.map(card => (
                 <GameCard
                   color={'white'}
                   key={card.localIndex}
@@ -106,21 +89,7 @@ function PlayerCards(props) {
                   badgeContent={setBadgeNumber(findPickIndex(card.data))}
                 />
               ))}
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <Grid container>
-              {gameState.bottomRowCards.map(card => (
-                <GameCard
-                  color={'white'}
-                  key={card.localIndex}
-                  card={card}
-                  onClick={handlePickWhite}
-                  children={card => card.data.text}
-                  badgeContent={setBadgeNumber(findPickIndex(card.data))}
-                />
-              ))}
-            </Grid>
+            </Box>
           </Grid>
           <SubmitCards />
         </Grid>
@@ -130,13 +99,10 @@ function PlayerCards(props) {
 }
 
 const styles = theme => ({
-  // playerCardContainer: {
-  //   position: 'absolute',
-  //   width: '100%',
-  //   maxWidth: '120rem',
-  //   bottom: '2rem',
-  //   left: '5rem',
-  // },
+  playerCardContainer: {
+    display: 'flex',
+    flexFlow: 'row wrap',
+  },
 });
 
 export default withRouter(withStyles(styles)(withSnackbar(PlayerCards)));

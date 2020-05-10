@@ -1,10 +1,8 @@
 import React, { useContext } from 'react';
-import Promise from 'bluebird';
 import { Players } from 'db';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { Box, Button } from '@material-ui/core';
-import Slide from '@material-ui/core/Slide';
+import { Button, Popper } from '@material-ui/core';
 import { GameContext } from '../gameContext.js';
 import { store } from 'store';
 import { logger } from 'logger';
@@ -22,6 +20,7 @@ function SubmitCards(props) {
       await playerRef.update({ selectedCards: gameState.selectedCards });
       log.info({}, 'Submitting cards');
       gameDispatch({ type: 'SET_SELECTED_CARDS', data: {} });
+      gameDispatch({ type: 'SHOW_SUBMIT', data: false });
     } catch (err) {
       log.error(err, 'error submitting cards');
       props.enqueueSnackbar(err.message, {
@@ -30,25 +29,30 @@ function SubmitCards(props) {
     }
   };
 
+  // https://material-ui.com/components/popper/#scroll-playground
+  // OR
+  // https://material-ui.com/components/drawers
   return (
-    <Slide
-      className={classes.slider}
-      direction={'up'}
-      in={gameState.showSubmit}
-      mountOnEnter
-      unmountOnExit
+    <Popper
+      open={gameState.showSubmit}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'center',
+      }}
+      transformOrigin={{
+        vertical: 'center',
+        horizontal: 'center',
+      }}
     >
-      <Box alignContent="center">
-        <Button
-          classes={{ root: classes.button }}
-          color={'default'}
-          variant={'cointained'}
-          onClick={handleSubmitCards}
-        >
-          submit
-        </Button>
-      </Box>
-    </Slide>
+      <Button
+        classes={{ root: classes.button }}
+        color={'default'}
+        variant={'cointained'}
+        onClick={handleSubmitCards}
+      >
+        submit
+      </Button>
+    </Popper>
   );
 }
 
@@ -66,7 +70,7 @@ const styles = theme => ({
     '&:hover': {
       backgroundColor: theme.palette.secondary.dark,
     },
-    width: '25%',
+    // width: '25%',
   },
 });
 

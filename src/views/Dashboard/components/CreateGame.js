@@ -17,7 +17,7 @@ function CreateGame(props) {
 
   const handleCreate = async () => {
     dispatch({ type: 'SET_AWAITING_GAME', data: true });
-    log.info({}, 'Creating Game Objects');
+    log.info('Creating Game Objects');
     const { gameData, playerData } = await createGameObjects();
     // set objects data on state
     dispatch({ type: 'SET_IS_HOST', data: true });

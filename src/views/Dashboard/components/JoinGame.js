@@ -44,22 +44,20 @@ function JoinGame(props) {
 
   const handleJoinGame = async game => {
     dispatch({ type: 'SET_AWAITING_GAME', data: true });
+    // set game and player
+    let playerData;
     try {
-      await updatePlayerCount(game);
+      const playerRef = await Players.add(getPlayerObject(currentUser, game._id));
+      playerData = { ...(await playerRef.get()).data(), _id: playerRef.id };
     } catch (err) {
       log.error(err, err.message);
       return props.enqueueSnackbar(err.message, {
         variant: 'error',
       });
     }
-    // set game and player
+
     try {
-      const playerRef = await Players.add(getPlayerObject(currentUser, game._id));
-      const playerData = { ...(await playerRef.get()).data(), _id: playerRef.id };
-      dispatch({ type: 'SET_GAME', data: game });
-      dispatch({ type: 'SET_GAME_ID', data: game._id });
-      dispatch({ type: 'SET_PLAYER', data: playerData });
-      dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
+      await updateGameObject(game, playerData._id);
       props.moveToGameCenter(game._id, playerData._id);
     } catch (err) {
       log.error(err, err.message);
@@ -67,9 +65,14 @@ function JoinGame(props) {
         variant: 'error',
       });
     }
+
+    dispatch({ type: 'SET_GAME', data: game });
+    dispatch({ type: 'SET_GAME_ID', data: game._id });
+    dispatch({ type: 'SET_PLAYER', data: playerData });
+    dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
   };
 
-  const updatePlayerCount = async game => {
+  const updateGameObject = async (game, _playerId) => {
     const gameRef = await Games.doc(game._id);
     return firebase.firestore().runTransaction(transaction => {
       return transaction.get(gameRef).then(game => {
@@ -77,7 +80,10 @@ function JoinGame(props) {
         if (newPlayerCount > game.data().playerLimit) {
           throw new Error('Opps! Too many players in this game, try another');
         }
-        return transaction.update(gameRef, { totalPlayers: newPlayerCount });
+        return transaction.update(gameRef, {
+          totalPlayers: newPlayerCount,
+          [`players.${_playerId}`]: firebase.firestore.Timestamp.now(),
+        });
       });
     });
   };

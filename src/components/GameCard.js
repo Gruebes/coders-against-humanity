@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import classnames from 'classnames';
-import { Badge, Grid, Paper, Typography } from '@material-ui/core';
+import { Badge, Box, Paper, Typography } from '@material-ui/core';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import withStyles from '@material-ui/core/styles/withStyles';
+import ReactCardFlip from 'react-card-flip';
+import renderHTML from 'react-render-html';
 
 const GameCard = props => {
+  const [flipped, setFlipped] = useState(true);
+
+  useEffect(() => {
+    // a lil bit of flipper action
+    const timeout = props.color === 'black' ? 1500 : 500;
+    setFlipped(true);
+    setTimeout(() => setFlipped(false), timeout);
+  }, [props.card.text, props.card.data && props.card.data.text]);
+
   return (
-    <Grid item xs={2} spacing={3}>
+    <Box classes={{ root: props.classes.cardContainer }}>
       <Badge
         badgeContent={props.badgeContent}
         color="secondary"
@@ -14,25 +25,44 @@ const GameCard = props => {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <ButtonBase>
-          <Paper
-            classes={{
-              root: classnames(props.classes.card, {
-                [props.classes[props.color]]: true,
-              }),
-            }}
-            onClick={() => props.onClick && props.onClick(props.card.data)}
-          >
-            <Typography classes={{ root: props.classes.cardText }} align={'left'}>
-              {props.children(props.card)}
-            </Typography>
-          </Paper>
+          <ReactCardFlip isFlipped={flipped} flipDirection="horizontal">
+            <Paper
+              key={'front'}
+              classes={{
+                root: classnames(props.classes.card, {
+                  [props.classes[props.color]]: true,
+                }),
+              }}
+              onClick={() => props.onClick && props.onClick(props.card.data)}
+            >
+              <Typography classes={{ root: props.classes.cardText }} align={'left'}>
+                {renderHTML(`${props.children(props.card)}`)}
+              </Typography>
+            </Paper>
+            <Paper
+              key={'back'}
+              classes={{
+                root: classnames(props.classes.card, {
+                  [props.classes[props.color]]: true,
+                }),
+              }}
+              onClick={() => setFlipped(!flipped)}
+            >
+              <Typography classes={{ root: props.classes.cardText }} align={'left'}>
+                Coders Against Humanity
+              </Typography>
+            </Paper>
+          </ReactCardFlip>
         </ButtonBase>
       </Badge>
-    </Grid>
+    </Box>
   );
 };
 
 const styles = theme => ({
+  cardContainer: {
+    margin: '1rem',
+  },
   card: {
     display: 'flex',
     flexDirection: 'column',

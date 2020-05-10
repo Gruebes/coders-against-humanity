@@ -9,7 +9,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
 import { logger } from 'logger';
 
-const log = logger.child({ component: 'GameDetails' });
+const log = logger.child({ location: 'GameDetails' });
 
 function GameDetails(props) {
   const { dispatch: gameDispatch, state: gameState } = useContext(GameContext);
@@ -37,7 +37,7 @@ function GameDetails(props) {
               children={card => {
                 return Object.entries(gameState.selectedCards).reduce(
                   (text, [localIndex, nextWhiteCard]) => {
-                    text = text.replace('_', nextWhiteCard.text);
+                    text = text.replace('_', `<u><em>${nextWhiteCard.text}</em></u>`);
                     text = text.replace('.', '');
                     return text;
                   },

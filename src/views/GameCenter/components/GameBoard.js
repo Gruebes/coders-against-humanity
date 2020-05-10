@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Grid } from '@material-ui/core';
 import { withSnackbar } from 'notistack';
+import ChooseBlackModal from './ChooseBlackModal';
 import GameDetails from './GameDetails';
 import PlayerCards from './PlayerCards';
 import { GameStateProvider } from '../gameContext';
@@ -14,6 +15,7 @@ function GameBoard(props) {
         <Grid item xs={12}>
           <GameDetails />
           <PlayerCards />
+          <ChooseBlackModal />
         </Grid>
       </Grid>
     </GameStateProvider>
