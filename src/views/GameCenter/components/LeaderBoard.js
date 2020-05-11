@@ -19,7 +19,7 @@ function LeaderBoard(props) {
   useEffect(() => {
     if (state.game && state.player && state.otherPlayers) {
       const allPlayers = [state.player, ...state.otherPlayers];
-      const currentTurn = allPlayers.find(player => player._id === state.game.currentTurn.player);
+      const currentTurn = allPlayers.find(player => player._id === state.game.currentTurn.czar);
 
       gameDispatch({ type: 'SET_ALL_PLAYERS', data: allPlayers });
       gameDispatch({ type: 'SET_CURRENT_TURN', data: currentTurn });

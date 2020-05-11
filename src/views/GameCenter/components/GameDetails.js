@@ -37,8 +37,12 @@ function GameDetails(props) {
               children={card => {
                 return Object.entries(gameState.selectedCards).reduce(
                   (text, [localIndex, nextWhiteCard]) => {
-                    text = text.replace('_', `<u><em>${nextWhiteCard.text}</em></u>`);
-                    text = text.replace('.', '');
+                    if (text.includes('_')) {
+                      text = text.replace('_', `<u><em>${nextWhiteCard.text}</em></u>`);
+                      text = text.replace('.', '');
+                    } else {
+                      text = `${text} <u><em>${nextWhiteCard.text}</em></u>`;
+                    }
                     return text;
                   },
                   card.text

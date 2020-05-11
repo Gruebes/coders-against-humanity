@@ -24,7 +24,6 @@ function GameCenter(props) {
 
         const [, _gameId, _playerId] = regex.exec(props.location.search);
         if (!_gameId || !_playerId) {
-          debugger;
           throw new Error('No game or player ids on history.locaation.state');
         }
 
@@ -135,17 +134,17 @@ function GameCenter(props) {
 
               // get the first avaiable white cards from ledger according to whiteEntriesToRepl.length
               const useCards = Object.entries(ledgerData.whiteCards)
-                .filter(([cardIndex, val]) => val === null)
+                .filter(([cardIndex, val]) => val.delt_to === null)
                 .slice(0, whiteEntriesToRepl.length);
               // mark the new cards on the ledger
               useCards.forEach(([cardIndex, val]) => {
-                ledgerData.whiteCards[cardIndex] = playerChange.doc.id;
+                ledgerData.whiteCards[cardIndex].delt_to = playerChange.doc.id;
               });
 
               // t.get those cards
-              const newCards = await Promise.mapSeries(useCards, async card => {
-                const cardIndex = card[0];
-                const cardRef = firebase.firestore().collection('/white_cards').doc(cardIndex);
+              const newCards = await Promise.map(useCards, async ([index, data]) => {
+                const cardIndex = data.index;
+                const cardRef = firebase.firestore().collection('/white_cards').doc(`${cardIndex}`);
                 const cardData = (await t.get(cardRef)).data();
                 return cardData;
               });
@@ -159,7 +158,7 @@ function GameCenter(props) {
               const playerRef = playerChange.doc.ref;
               await t.update(playerRef, { whiteCards: playerData.whiteCards });
               // update ledger
-              return t.update(ledgerRef, { whiteCards: ledgerData.whiteCards });
+              return await t.update(ledgerRef, { whiteCards: ledgerData.whiteCards });
             });
           });
         },
@@ -187,13 +186,16 @@ function GameCenter(props) {
     // create game deck
     const gameLedger = getGameDeck(shuffledBlack, shuffledWhite);
     // set players white cards
-    await createPlayersWhiteCardsMap(gameLedger, shuffledWhite);
+    await createPlayersWhiteCardsMap(gameLedger);
 
+    // TODO: getting the same black card each time
     const blackIndex = shuffledBlack[0];
     const blackCard = (await BlackCards.doc(`${blackIndex}`).get()).data();
     // mark this card on game deck
-    gameLedger.blackCards[blackIndex] = true;
-    // set game deck
+    gameLedger.blackCards[0].delt = true;
+
+    // TRANSACTION?
+    // set game ledger
     await GameLedgers.doc(state._gameId).set(gameLedger);
     // update black card on game
     return Games.doc(state._gameId).update({
@@ -202,18 +204,27 @@ function GameCenter(props) {
     });
   };
 
-  const createPlayersWhiteCardsMap = async (gameLedger, shuffledWhite) => {
+  const createPlayersWhiteCardsMap = async ledgerData => {
     const players = await Players.where('_gameId', '==', state._gameId).get();
     const batch = firebase.firestore().batch();
 
+    // build up player decks
     await Promise.each(players.docs, async player => {
       // get 10 cards from deck
-      const cards = shuffledWhite.splice(0, 10);
-      // TODO: get all card docs from db and place on player doc
+      const useCards = Object.entries(ledgerData.whiteCards)
+        .filter(([cardIndex, val]) => val.delt_to === null)
+        .slice(0, 10);
+      // card indexes for query
+      const cardIdxs = useCards.map(c => c[1].index);
+
+      useCards.forEach(([cardIndex, val]) => {
+        // mark the card on the game_deck ledger (modifies in place)
+        ledgerData.whiteCards[cardIndex].delt_to = player.id;
+      });
       const cardsSnapShot = await firebase
         .firestore()
         .collection('/white_cards')
-        .where('index', 'in', cards)
+        .where('index', 'in', cardIdxs)
         .get();
 
       const playersCards = {};
@@ -221,15 +232,13 @@ function GameCenter(props) {
         const cardData = card.data();
         // set players starting cards
         playersCards[index] = cardData;
-        // mark the card on the game_deck ledger (modifies in place)
-        gameLedger.whiteCards[cardData.index] = player.id;
       });
 
       const playerRef = Players.doc(player.id);
       return batch.update(playerRef, { whiteCards: playersCards });
-      // Commit the batch
     });
 
+    // Commit the batch
     return batch.commit();
   };
   /**
@@ -262,12 +271,12 @@ export default withRouter(withStyles(styles)(withSnackbar(GameCenter)));
 
 const getGameDeck = (blackCards, whiteCards) => {
   return {
-    blackCards: blackCards.reduce((acc, c) => {
-      acc[c] = null;
+    blackCards: blackCards.reduce((acc, index, idx) => {
+      acc[idx] = { index, delt: null };
       return acc;
     }, {}),
-    whiteCards: whiteCards.reduce((acc, c) => {
-      acc[c] = null;
+    whiteCards: whiteCards.reduce((acc, index, idx) => {
+      acc[idx] = { index, delt_to: null };
       return acc;
     }, {}),
   };
@@ -280,17 +289,6 @@ const getCardIndexes = count => {
   }
   return indexArray;
 };
-
-// const shuffle = deck => {
-//   let m = deck.length,
-//     i;
-//   while (m) {
-//     i = Math.floor(Math.random() * m--);
-
-//     [deck[m], deck[i]] = [deck[i], deck[m]];
-//   }
-//   return deck;
-// };
 
 const fisherYatesShuffle = deck => {
   let theLength = deck.length - 1;

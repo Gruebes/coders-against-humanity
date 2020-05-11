@@ -35,14 +35,7 @@ function SubmitCards(props) {
   return (
     <Popper
       open={gameState.showSubmit}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'center',
-        horizontal: 'center',
-      }}
+      style={{ position: 'fixed', bottom: '1rem', right: 'unset', top: 'unset', left: '45%' }}
     >
       <Button
         classes={{ root: classes.button }}

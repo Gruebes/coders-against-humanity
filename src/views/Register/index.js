@@ -1,10 +1,19 @@
 import React, { useContext, useState } from 'react';
-import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel } from '@material-ui/core';
+import {
+  Typography,
+  Paper,
+  Avatar,
+  Button,
+  FormControl,
+  Input,
+  InputLabel,
+} from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link, withRouter } from 'react-router-dom';
 import firebase, { Users } from '../../firebase';
 import { AuthContext } from '../Auth';
+import { getUserObject } from '../utils';
 
 function Register(props) {
   const { classes } = props;
@@ -38,7 +47,13 @@ function Register(props) {
           </FormControl>
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="email">Email Address</InputLabel>
-            <Input id="email" name="email" autoComplete="off" value={email} onChange={e => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              name="email"
+              autoComplete="off"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
           </FormControl>
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="password">Password</InputLabel>
@@ -96,20 +111,9 @@ function Register(props) {
       await user.updateProfile({
         displayName: name,
       });
-
-      Users.child(currentUser.uid).set({
-        displayName: currentUser.displayName,
-        joinedGame: '',
-        whiteCards: '',
-        blackCards: '',
-        winCount: '',
-        totalBlackCards: 0,
-        uid: currentUser.uid,
-        profile: {
-          info: '',
-          pic: null,
-        },
-      });
+      debugger;
+      const newUser = getUserObject(user);
+      await Users.doc(user.uid).set(newUser);
       props.history.replace('/dashboard');
     } catch (error) {
       alert(error.message);

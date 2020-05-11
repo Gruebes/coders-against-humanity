@@ -47,8 +47,10 @@ function JoinGame(props) {
     // set game and player
     let playerData;
     try {
-      const playerRef = await Players.add(getPlayerObject(currentUser, game._id));
-      playerData = { ...(await playerRef.get()).data(), _id: playerRef.id };
+      const playerRef = Players.doc();
+      const player = getPlayerObject(currentUser, playerRef.id, game._id);
+      await playerRef.set(player);
+      playerData = (await playerRef.get()).data();
     } catch (err) {
       log.error(err, err.message);
       return props.enqueueSnackbar(err.message, {
