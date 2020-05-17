@@ -29,12 +29,14 @@ const rawTheme = createMuiTheme({
     },
   },
   typography: {
-    fontFamily: "'Work Sans', sans-serif",
+    // https://fonts.google.com/specimen/Montserrat
+    fontFamily: "'Montserrat', sans-serif",
     fontSize: 14,
     // htmlFontSize: 16,
-    fontWeightLight: 300, // Work Sans
-    fontWeightRegular: 400, // Work Sans
-    fontWeightMedium: 700, // Roboto Condensed
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 700,
+    fontWeightBold: 900,
     fontFamilySecondary: "'Roboto Condensed', sans-serif",
   },
 });

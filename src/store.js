@@ -4,11 +4,14 @@ const initialState = {
   awaitingGame: false,
   cardsToWin: 7,
   game: null,
+  _gameId: null,
   isHost: false,
   openGames: [],
+  playerCards: null,
   playerCount: 4,
   player: null,
-  playersAwaiting: [],
+  _playerId: null,
+  otherPlayers: [],
 };
 
 const store = createContext(initialState);
@@ -23,16 +26,22 @@ const StateProvider = ({ children }) => {
         return { ...state, cardsToWin: action.data };
       case 'SET_GAME':
         return { ...state, game: action.data };
+      case 'SET_GAME_ID':
+        return { ...state, _gameId: action.data };
       case 'SET_IS_HOST':
         return { ...state, isHost: action.data };
       case 'SET_OPEN_GAMES':
         return { ...state, openGames: action.data };
+      case 'SET_PLAYER_CARDS':
+        return { ...state, playerCards: action.data };
       case 'SET_PLAYER_COUNT':
         return { ...state, playerCount: action.data };
       case 'SET_PLAYER':
         return { ...state, player: action.data };
-      case 'SET_PLAYERS_AWAITING':
-        return { ...state, playersAwaiting: action.data };
+      case 'SET_PLAYER_ID':
+        return { ...state, _playerId: action.data };
+      case 'SET_OTHER_PLAYERS':
+        return { ...state, otherPlayers: action.data };
       default:
         throw new Error();
     }

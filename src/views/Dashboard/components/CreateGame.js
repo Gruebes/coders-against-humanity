@@ -6,9 +6,9 @@ import { withRouter } from 'react-router-dom';
 import { AuthContext } from '../../Auth';
 import { store } from '../../../store';
 import { getGameObject, getPlayerObject } from '../../utils';
-import Logger from '../../../logger';
+import { logger } from '../../../logger';
 
-const logger = new Logger({ location: 'CreateGame' });
+const log = logger.child({ component: 'CreateGame' });
 
 function CreateGame(props) {
   const { classes } = props;
@@ -17,12 +17,15 @@ function CreateGame(props) {
 
   const handleCreate = async () => {
     dispatch({ type: 'SET_AWAITING_GAME', data: true });
+    log.info('Creating Game Objects');
     const { gameData, playerData } = await createGameObjects();
     // set objects data on state
     dispatch({ type: 'SET_IS_HOST', data: true });
     dispatch({ type: 'SET_GAME', data: gameData });
+    dispatch({ type: 'SET_GAME_ID', data: gameData._id });
     dispatch({ type: 'SET_PLAYER', data: playerData });
-    logger.info({ _gameId: gameData._id, _playerId: playerData._id }, 'Created Game Objects');
+    dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
+    log.info({ _gameId: gameData._id, _playerId: playerData._id }, 'Created Game Objects');
     props.moveToGameCenter(gameData._id, playerData._id);
   };
 
@@ -30,10 +33,19 @@ function CreateGame(props) {
     // Create/Set player and game objects
     const gameRef = Games.doc();
     const playerRef = Players.doc();
-    await gameRef.set(getGameObject(currentUser, state.cardsToWin, state.playerCount, playerRef.id));
-    await playerRef.set(getPlayerObject(currentUser, gameRef.id, true));
-    const gameData = { ...(await gameRef.get()).data(), _id: gameRef.id };
-    const playerData = { ...(await playerRef.get()).data(), _id: playerRef.id };
+
+    const game = getGameObject(
+      currentUser,
+      state.cardsToWin,
+      state.playerCount,
+      playerRef.id,
+      gameRef.id
+    );
+    const player = getPlayerObject(currentUser, playerRef.id, gameRef.id, true);
+    await playerRef.set(player);
+    await gameRef.set(game);
+    const gameData = (await gameRef.get()).data();
+    const playerData = (await playerRef.get()).data();
     return { gameData, playerData };
   };
 

@@ -1,10 +1,10 @@
 class GameStateTypes {
   constructor() {
     this.open = 0;
-    this.initalizing = 1;
-    this.ready = 2;
+    this.waiting = 1;
+    this.initalizing = 2;
     this.chooseWhite = 3;
-    this.pickWhite = 4;
+    this.chooseBlack = 4;
     this.showCards = 5;
     this.nextTurn = 6;
     this.gameOver = 7;

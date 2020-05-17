@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import {
   Button,
   CircularProgress,
@@ -10,64 +10,31 @@ import {
   TableRow,
   Paper,
 } from '@material-ui/core';
-import firebase, { Games, Players } from '../../../firebase';
+import { Games } from '../../../firebase';
 import { store } from '../../../store';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import Logger from '../../../logger';
+import { logger } from '../../../logger';
 import { gameStateTypes } from '../../../enums';
 
-const logger = new Logger({ location: 'AwaitingPlayers' });
+const log = logger.child({ component: 'AwaitingPlayers' });
+
 function AwaitingPlayers(props) {
   const { classes } = props;
-  const { dispatch, state } = useContext(store);
-
-  // get player and game
-  // useEffect(() => {
-  //   const getGameAndPlayer = async () => {
-  //     try {
-  //       const game = (await Games.doc(state.game._id).get()).data();
-  //       dispatch({ type: 'SET_GAME', data: game });
-  //       const player = (await Players.doc(state._playerId).get()).data();
-  //       dispatch({ type: 'SET_PLAYER', data: player });
-  //     } catch (err) {
-  //       logger.error(err, 'Could not set Current Player');
-  //       props.enqueueSnackbar('Could not set Current Player');
-  //     }
-  //   };
-  //   getGameAndPlayer();
-  // }, []);
-
-  // listen for players joining
-  useEffect(() => {
-    if (state.game._id) {
-      return Players.where('_gameId', '==', state.game._id).onSnapshot(
-        querySnapshot => {
-          // get player data
-          const docs = querySnapshot.docs
-            .map(doc => ({ ...doc.data(), _id: doc.id }))
-            // remove self from players list ??
-            .filter(p => p.id !== state._playerId);
-          // set players
-          dispatch({ type: 'SET_PLAYERS_AWAITING', data: docs });
-        },
-        err => {
-          logger.error(err, 'Error listening for players');
-          props.enqueueSnackbar('Error listening for players');
-        }
-      );
-    }
-  }, [dispatch, state.game._id]);
+  const { state } = useContext(store);
 
   const startGame = async () => {
-    // TODO: Show cards move to select White
-    return Games.doc(state.game._id).update({ state: gameStateTypes.ready });
+    log.info(
+      { function: 'startGame', stateChange: gameStateTypes.initalizing, game_id: state._gameId },
+      'starting new game'
+    );
+    return Games.doc(state._gameId).update({ state: gameStateTypes.initalizing });
   };
 
   return (
     <Paper className={classes.paper}>
-      {state.playersAwaiting.length ? (
+      {state.otherPlayers && state.otherPlayers.length ? (
         <TableContainer>
           <Table className={classes.table} aria-label="a dense table">
             <TableHead>
@@ -76,7 +43,7 @@ function AwaitingPlayers(props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {state.playersAwaiting.map(player => (
+              {state.otherPlayers.map(player => (
                 <TableRow key={player._id}>
                   <TableCell component="th" scope="row">
                     {player.displayName}
