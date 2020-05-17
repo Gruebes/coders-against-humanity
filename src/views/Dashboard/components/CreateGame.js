@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import { Button, FormControl, InputLabel, MenuItem, Select, Paper } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { Games, Players } from 'db';
+import { Games, Players } from '../../../firebase';
 import { withRouter } from 'react-router-dom';
 import { AuthContext } from '../../Auth';
-import { store } from 'store';
+import { store } from '../../../store';
 import { getGameObject, getPlayerObject } from '../../utils';
-import { logger } from 'logger';
+import { logger } from '../../../logger';
 
 const log = logger.child({ component: 'CreateGame' });
 
@@ -42,8 +42,8 @@ function CreateGame(props) {
       gameRef.id
     );
     const player = getPlayerObject(currentUser, playerRef.id, gameRef.id, true);
-    await gameRef.set(game);
     await playerRef.set(player);
+    await gameRef.set(game);
     const gameData = (await gameRef.get()).data();
     const playerData = (await playerRef.get()).data();
     return { gameData, playerData };

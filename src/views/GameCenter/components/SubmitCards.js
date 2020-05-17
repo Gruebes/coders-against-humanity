@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
-import { Players } from 'db';
+import firebase from '../../../firebase';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { Button, Popper } from '@material-ui/core';
+import { Button, Popper, CircularProgress } from '@material-ui/core';
 import { GameContext } from '../gameContext.js';
-import { store } from 'store';
-import { logger } from 'logger';
+import { store } from '../../../store';
+import { logger } from '../../../logger';
 
 const log = logger.child({ component: 'SubmitCards' });
 function SubmitCards(props) {
@@ -15,12 +15,17 @@ function SubmitCards(props) {
 
   const handleSubmitCards = async () => {
     try {
-      const playerRef = Players.doc(state._playerId);
-      // const player = await playerRef.get();
-      await playerRef.update({ selectedCards: gameState.selectedCards });
-      log.info({}, 'Submitting cards');
+      gameDispatch({ type: 'TRADING', data: true });
       gameDispatch({ type: 'SET_SELECTED_CARDS', data: {} });
+      const tradeCards = firebase.functions().httpsCallable('tradeCards');
+      const result = await tradeCards({
+        _gameId: state._gameId,
+        _playerId: state._playerId,
+        selectedCards: gameState.selectedCards,
+      });
+      log.info({}, 'Submitting cards');
       gameDispatch({ type: 'SHOW_SUBMIT', data: false });
+      gameDispatch({ type: 'TRADING', data: false });
     } catch (err) {
       log.error(err, 'error submitting cards');
       props.enqueueSnackbar(err.message, {
@@ -42,8 +47,9 @@ function SubmitCards(props) {
         color={'default'}
         variant={'cointained'}
         onClick={handleSubmitCards}
+        disabled={gameState.trading}
       >
-        submit
+        {gameState.trading ? <CircularProgress /> : 'submit'}
       </Button>
     </Popper>
   );

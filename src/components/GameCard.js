@@ -36,8 +36,9 @@ const GameCard = props => {
               onClick={() => props.onClick && props.onClick(props.card.data)}
             >
               <Typography classes={{ root: props.classes.cardText }} align={'left'}>
-                {renderHTML(`${props.children(props.card)}`)}
+                {renderHTML(`${props.renderText(props.card)}`)}
               </Typography>
+              {props.children}
             </Paper>
             <Paper
               key={'back'}

@@ -1,13 +1,13 @@
 import React, { useContext, useEffect } from 'react';
 import { Grid } from '@material-ui/core';
-import { GameCard } from 'components';
+import { GameCard } from '../../../components';
 import LeaderBoard from './LeaderBoard';
-import { store } from 'store';
+import { store } from '../../../store';
 import { GameContext } from '../gameContext.js';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { logger } from 'logger';
+import { logger } from '../../../logger';
 
 const log = logger.child({ location: 'GameDetails' });
 
@@ -34,12 +34,13 @@ function GameDetails(props) {
               color={'black'}
               key={gameState.blackCard.index}
               card={gameState.blackCard}
-              children={card => {
+              renderText={card => {
                 return Object.entries(gameState.selectedCards).reduce(
                   (text, [localIndex, nextWhiteCard]) => {
                     if (text.includes('_')) {
-                      text = text.replace('_', `<u><em>${nextWhiteCard.text}</em></u>`);
-                      text = text.replace('.', '');
+                      text = text
+                        .replace('____', `<u><em>${nextWhiteCard.text}</em></u>`)
+                        .replace('.', '');
                     } else {
                       text = `${text} <u><em>${nextWhiteCard.text}</em></u>`;
                     }

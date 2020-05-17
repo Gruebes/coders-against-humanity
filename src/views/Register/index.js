@@ -111,7 +111,7 @@ function Register(props) {
       await user.updateProfile({
         displayName: name,
       });
-      debugger;
+      // TODO: move this to an auth clound function
       const newUser = getUserObject(user);
       await Users.doc(user.uid).set(newUser);
       props.history.replace('/dashboard');

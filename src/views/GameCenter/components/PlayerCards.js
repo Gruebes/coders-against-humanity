@@ -1,12 +1,12 @@
 import React, { useContext, useEffect } from 'react';
 import { Box, Grid } from '@material-ui/core';
-import { GameCard } from 'components';
-import { store } from 'store';
+import { GameCard } from '../../../components';
+import { store } from '../../../store';
 import { GameContext } from '../gameContext.js';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { logger } from 'logger';
+import { logger } from '../../../logger';
 import SubmitCards from './SubmitCards';
 
 const log = logger.child({ component: 'PlayerCards' });
@@ -85,7 +85,7 @@ function PlayerCards(props) {
                   key={card.localIndex}
                   card={card}
                   onClick={handlePickWhite}
-                  children={card => card.data.text}
+                  renderText={card => card.data.text}
                   badgeContent={setBadgeNumber(findPickIndex(card.data))}
                 />
               ))}

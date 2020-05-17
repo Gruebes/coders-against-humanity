@@ -4,6 +4,7 @@ import 'firebase/auth';
 import 'firebase/analytics';
 import 'firebase/database';
 import 'firebase/firestore';
+import 'firebase/functions';
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_DOMAIN,

@@ -10,13 +10,13 @@ import {
   TableRow,
   Paper,
 } from '@material-ui/core';
-import { Games } from 'db';
-import { store } from 'store';
+import { Games } from '../../../firebase';
+import { store } from '../../../store';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { logger } from 'logger';
-import { gameStateTypes } from 'enums';
+import { logger } from '../../../logger';
+import { gameStateTypes } from '../../../enums';
 
 const log = logger.child({ component: 'AwaitingPlayers' });
 

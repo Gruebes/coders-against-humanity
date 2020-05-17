@@ -2,19 +2,20 @@ import { gameStateTypes } from '../enums';
 import firebase from '../firebase';
 
 export const getPlayerObject = (currentUser, _id, _gameId, isHost = false) => {
+  const { uid, displayName } = currentUser;
   return {
     _id,
     _gameId,
     blackCardsWon: 0,
     created_at: firebase.firestore.Timestamp.now(),
-    displayName: currentUser.profile.displayName,
+    displayName,
     ended_at: null,
     isHost,
     playerState: {
       connected: 1,
     },
     selectedCards: {},
-    user_uid: currentUser.uid,
+    user_uid: uid,
     whiteCards: {},
   };
 };

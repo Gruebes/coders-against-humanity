@@ -12,7 +12,6 @@ const initialState = {
   player: null,
   _playerId: null,
   otherPlayers: [],
-  showChooseBlack: false,
 };
 
 const store = createContext(initialState);
@@ -43,8 +42,6 @@ const StateProvider = ({ children }) => {
         return { ...state, _playerId: action.data };
       case 'SET_OTHER_PLAYERS':
         return { ...state, otherPlayers: action.data };
-      case 'SHOW_CHOOSE_BLACK':
-        return { ...state, showChooseBlack: action.data };
       default:
         throw new Error();
     }

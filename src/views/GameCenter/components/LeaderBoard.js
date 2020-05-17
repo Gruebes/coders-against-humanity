@@ -1,14 +1,11 @@
 import React, { useContext, useEffect } from 'react';
 import { Avatar, Chip, Grid, Paper, Typography } from '@material-ui/core';
-
-import { Face } from '@material-ui/icons';
-
-import { store } from 'store';
+import { store } from '../../../store';
 import { GameContext } from '../gameContext.js';
 import { withRouter } from 'react-router-dom';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
-import { logger } from 'logger';
+import { logger } from '../../../logger';
 
 const log = logger.child({ component: 'LeaderBoard' });
 function LeaderBoard(props) {
@@ -19,21 +16,21 @@ function LeaderBoard(props) {
   useEffect(() => {
     if (state.game && state.player && state.otherPlayers) {
       const allPlayers = [state.player, ...state.otherPlayers];
-      const currentTurn = allPlayers.find(player => player._id === state.game.currentTurn.czar);
+      const currentCzar = allPlayers.find(player => player._id === state.game.currentTurn.czar);
 
       gameDispatch({ type: 'SET_ALL_PLAYERS', data: allPlayers });
-      gameDispatch({ type: 'SET_CURRENT_TURN', data: currentTurn });
+      gameDispatch({ type: 'SET_CURRENT_CZAR', data: currentCzar });
     }
   }, [state.game && state.game.currentTurn, state.player, state.otherPlayers]);
 
   return (
     <div>
-      {gameState.allPlayers && gameState.currentTurn && (
+      {gameState.allPlayers && gameState.currentCzar && (
         <Paper classes={{ root: classes.container }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Grid container spacing={2}>
-                <Grid item={12}>Current Turn: {gameState.currentTurn.displayName}</Grid>
+                <Grid item={12}>Current Turn: {gameState.currentCzar.displayName}</Grid>
               </Grid>
               <Grid container spacing={2}>
                 {gameState.allPlayers.map(player => (

@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
-import firebase, { Games, Players } from 'db';
+import firebase, { Games, Players } from '../../../firebase';
 import { withRouter } from 'react-router-dom';
 import { AuthContext } from '../../Auth';
-import { store } from 'store';
-import { gameStateTypes } from 'enums';
+import { store } from '../../../store';
+import { gameStateTypes } from '../../../enums';
 import { getPlayerObject } from '../../utils';
 import {
   Button,
@@ -17,7 +17,7 @@ import {
   Paper,
 } from '@material-ui/core';
 import { withSnackbar } from 'notistack';
-import { logger } from 'logger';
+import { logger } from '../../../logger';
 
 const log = logger.child({ component: 'JoinGame' });
 function JoinGame(props) {
@@ -58,6 +58,11 @@ function JoinGame(props) {
       });
     }
 
+    dispatch({ type: 'SET_GAME', data: game });
+    dispatch({ type: 'SET_GAME_ID', data: game._id });
+    dispatch({ type: 'SET_PLAYER', data: playerData });
+    dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
+
     try {
       await updateGameObject(game, playerData._id);
       props.moveToGameCenter(game._id, playerData._id);
@@ -67,11 +72,6 @@ function JoinGame(props) {
         variant: 'error',
       });
     }
-
-    dispatch({ type: 'SET_GAME', data: game });
-    dispatch({ type: 'SET_GAME_ID', data: game._id });
-    dispatch({ type: 'SET_PLAYER', data: playerData });
-    dispatch({ type: 'SET_PLAYER_ID', data: playerData._id });
   };
 
   const updateGameObject = async (game, _playerId) => {

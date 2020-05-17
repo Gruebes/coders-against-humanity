@@ -1,11 +1,11 @@
 import React, { useContext, useEffect } from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withRouter } from 'react-router-dom';
-import { store } from 'store';
-import { Games } from 'db';
-import { gameStateTypes } from 'enums';
+import { store } from '../../store';
+import { Games } from '../../firebase';
+import { gameStateTypes } from '../../enums';
 import { withSnackbar } from 'notistack';
-import { logger } from 'logger';
+import { logger } from '../../logger';
 
 import CreateGame from './components/CreateGame';
 import JoinGame from './components/JoinGame';
