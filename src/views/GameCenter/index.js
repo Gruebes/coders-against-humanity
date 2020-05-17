@@ -97,24 +97,6 @@ function GameCenter(props) {
           if (currentPlayer) {
             dispatch({ type: 'SET_PLAYER', data: currentPlayer });
           }
-
-          /**
-           * cloud actions below
-           */
-          if (!querySnapshot.size || !state.player.isHost) return;
-
-          const players = querySnapshot.docs.map(doc => ({ ...doc.data(), _id: doc.id }));
-          const gameId = players[0]._gameId;
-          const allPlayersSubmitted = players.every(p => Object.keys(p.selectedCards).length);
-          const gameRef = firebase.firestore().collection('/games').doc(gameId);
-          const gameData = (await gameRef.get()).data();
-
-          // TODO: move this to the end of the trade?
-          // check to see if allPlayers have cards submitted
-          if (gameData.state === gameStateTypes.chooseWhite && allPlayersSubmitted) {
-            // if so, set the game state to selectBlack
-            await gameRef.update({ state: gameStateTypes.chooseBlack });
-          }
         },
         err => {
           log.error(err, 'Error listening for players');

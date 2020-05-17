@@ -48,13 +48,33 @@ export const tradeCards = functions.https.onCall(async (data, context) => {
       playerData.whiteCards[whiteIdx] = newCards[index];
     });
     // update that on the players doc
-    // const playerRef = playerChange.doc.ref;
     console.log('Updating Player', playerData);
     await t.update(playerRef, { whiteCards: playerData.whiteCards, selectedCards });
     // update ledger
     console.log('Updating ledger');
     return await t.update(ledgerRef, { whiteCards: ledgerData.whiteCards });
   });
+
+  const playerSnapshots = await admin
+    .firestore()
+    .collection('players')
+    .where('_gameId', '==', _gameId)
+    .get();
+  console.log('checking if all players have selected...');
+
+  const playersData = playerSnapshots.docs.map(doc => ({ ...doc.data(), _id: doc.id }));
+  const allPlayersSubmitted = playersData.every((p: any) => Object.keys(p.selectedCards).length);
+
+  const gameRef = admin.firestore().collection('/games').doc(_gameId);
+  const gameData: any = (await gameRef.get()).data();
+
+  console.log(`allPlayersSubmitted=${allPlayersSubmitted}`);
+  console.log(`Current state=${gameData.state}`);
+  if (gameData.state === 3 && allPlayersSubmitted) {
+    // if so, set the game state to selectBlack
+    console.log(`updating state to chooseBlack:4`);
+    await gameRef.update({ state: 4 });
+  }
 
   return { status: 'ok!' };
 });

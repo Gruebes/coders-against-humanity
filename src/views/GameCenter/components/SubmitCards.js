@@ -16,7 +16,6 @@ function SubmitCards(props) {
   const handleSubmitCards = async () => {
     try {
       gameDispatch({ type: 'TRADING', data: true });
-      gameDispatch({ type: 'SET_SELECTED_CARDS', data: {} });
       const tradeCards = firebase.functions().httpsCallable('tradeCards');
       const result = await tradeCards({
         _gameId: state._gameId,
@@ -26,6 +25,7 @@ function SubmitCards(props) {
       log.info({}, 'Submitting cards');
       gameDispatch({ type: 'SHOW_SUBMIT', data: false });
       gameDispatch({ type: 'TRADING', data: false });
+      gameDispatch({ type: 'SET_SELECTED_CARDS', data: {} });
     } catch (err) {
       log.error(err, 'error submitting cards');
       props.enqueueSnackbar(err.message, {
